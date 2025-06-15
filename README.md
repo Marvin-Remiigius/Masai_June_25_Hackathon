@@ -48,7 +48,7 @@
    ```
 4. **Run the app** using Streamlit:
    ```
-   streamlit run app_vE.py
+   streamlit run app.py
    ```
 5. **Interact with the app** in your browser:
    - View analytics and suspicious listings.
@@ -72,7 +72,7 @@ Fraudulent job postings are a real threat to job seekers. With severe class imba
 
 ## Credits
 
-Developed for IITG_DS_COURSE Hackathon, June 2025.
+Developed by Team Data Disciples for IITG_DS_COURSE Hackathon, June 2025.
 
 ---
 
