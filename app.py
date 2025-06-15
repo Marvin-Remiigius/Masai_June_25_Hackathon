@@ -79,7 +79,7 @@ st.title("Spot the Scam - Fraud Job Detection")
 # Load and preprocess training data from file
 @st.cache_data
 def load_and_preprocess_data():
-    df = pd.read_csv(r"C:\Marvin\College\IITG_DS_COURSE\25_June_Hackathon\fake_job_postings.csv")
+    df = pd.read_csv("fake_job_postings.csv")
     def clean_text(text):
         if pd.isna(text): return ""
         text = text.lower()
@@ -107,7 +107,7 @@ def train_model(df, n_estimators):
     model = RandomForestClassifier(n_estimators=n_estimators, class_weight='balanced', random_state=42)
     model.fit(X_resampled, y_resampled)
     probs = model.predict_proba(X_test_vec)[:, 1]
-    preds = (probs > 0.3).astype(int)
+    preds = (probs > 0.2).astype(int)
     f1 = f1_score(y_test, preds)
     return model, vectorizer, f1, probs, y_test, X_test
 
@@ -196,7 +196,7 @@ if url_submitted and naukri_url:
         new_text_clean = re.sub(r'[^a-z\s]', '', new_text.lower())
         vec = vectorizer.transform([new_text_clean])
         prob = model.predict_proba(vec)[0][1]
-        prediction = int(prob > 0.5)
+        prediction = int(prob > 0.25)
         label = "Fake" if prediction == 1 else "Real"
         st.markdown(f"### 🔍 Prediction: **{label}** ({prob:.2f} Probability)")
     else:
@@ -225,10 +225,30 @@ if csv_file is not None:
             bulk_df['text'] = bulk_df[expected_cols].agg(' '.join, axis=1)
             vecs = vectorizer.transform(bulk_df['text'])
             probs_bulk = model.predict_proba(vecs)[:, 1]
-            preds_bulk = (probs_bulk > 0.5).astype(int)
+            preds_bulk = (probs_bulk > 0.25).astype(int)
             bulk_df['Prediction'] = ['Fake' if p else 'Real' for p in preds_bulk]
             bulk_df['Probability'] = probs_bulk
             st.success("✅ Bulk predictions complete")
             st.dataframe(bulk_df[['title', 'Prediction', 'Probability']])
+
+            # Visualization
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.subheader("Histogram of Fraud Probabilities")
+                fig, ax = plt.subplots()
+                ax.hist(probs_bulk, bins=20, color='skyblue', edgecolor='black')
+                ax.set_title("Histogram of Fraud Probabilities")
+                ax.set_xlabel("Probability")
+                ax.set_ylabel("Frequency")
+                st.pyplot(fig)
+
+            with col2:
+                st.subheader("🥧 Pie Chart: Predicted Fake vs Real Jobs")
+                pred_counts = bulk_df['Prediction'].value_counts().sort_index()
+                fig2, ax2 = plt.subplots()
+                ax2.pie(pred_counts, labels=['Real (0)', 'Fake (1)'], autopct='%1.1f%%', colors=['#8fd9b6','#ff9999'])
+                ax2.set_title("Predicted Job Types")
+                st.pyplot(fig2)
     except Exception as e:
         st.error(f"Failed to process the file: {e}")
