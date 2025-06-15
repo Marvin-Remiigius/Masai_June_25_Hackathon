@@ -79,7 +79,7 @@ st.title("Spot the Scam - Fraud Job Detection")
 # Load and preprocess training data from file
 @st.cache_data
 def load_and_preprocess_data():
-    df = pd.read_csv(r"C:\Marvin\College\IITG_DS_COURSE\25_June_Hackathon\fake_job_postings.csv")
+    df = pd.read_csv("fake_job_postings.csv")
     def clean_text(text):
         if pd.isna(text): return ""
         text = text.lower()
